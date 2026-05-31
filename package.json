@@ -1,0 +1,43 @@
+{
+  "name": "@ali-dev/realty-ui",
+  "version": "1.0.0",
+  "description": "Luxury real estate React component library with Tailwind CSS",
+  "main": "index.ts",
+  "types": "index.ts",
+  "exports": {
+    ".": {
+      "import": "./index.ts",
+      "require": "./index.ts",
+      "types": "./index.ts"
+    },
+    "./components/*": "./components/*.tsx"
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint . --ext .ts,.tsx"
+  },
+  "keywords": [
+    "react",
+    "components",
+    "real-estate",
+    "luxury",
+    "tailwindcss",
+    "typescript",
+    "ui"
+  ],
+  "author": "Ali Dev",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "typescript": "^5.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ali-dev/realty-ui.git"
+  }
+}
