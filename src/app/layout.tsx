@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   keywords: ["webgl", "three.js", "gsap", "neon", "immersive"],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
