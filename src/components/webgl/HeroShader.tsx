@@ -2,72 +2,89 @@
 
 import { useRef, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { ShaderMaterial } from 'three';
+import { extend, ShaderMaterial, ReactThreeFiber } from '@react-three/fiber';
 import * as THREE from 'three';
 
+// Import shader code as strings
 import vertexShaderSource from '@/shaders/hero.vert.glsl';
 import fragmentShaderSource from '@/shaders/hero.frag.glsl';
 
 interface HeroShaderProps {
   mousePosition: { x: number; y: number };
+  isHovering?: boolean;
 }
 
-export default function HeroShader({ mousePosition }: HeroShaderProps) {
-  const materialRef = useRef<ShaderMaterial>(null);
-  const { size, viewport } = useThree();
+// Custom shader material component
+function VoronoiMaterial({
+  uTime,
+  uMouse,
+  uResolution,
+}: {
+  uTime: number;
+  uMouse: [number, number];
+  uResolution: [number, number];
+}) {
+  const materialRef = useRef<THREE.ShaderMaterial>(null);
 
-  // Volcanic Dark palette - converted to normalized RGB (0-1 range)
-  const colors = useMemo(
+  const uniforms = useMemo(
     () => ({
-      bg: new THREE.Color('#0C0C0A'), // #0C0C0A → (0.047, 0.047, 0.039)
-      surface: new THREE.Color('#141412'),
-      accent: new THREE.Color('#C8A96E'),
-      glow: new THREE.Color('#D4B896'),
+      uTime: { value: uTime },
+      uMouse: { value: new THREE.Vector2(uMouse[0], uMouse[1]) },
+      uResolution: { value: new THREE.Vector2(uResolution[0], uResolution[1]) },
+      uHover: { value: 0.0 },
     }),
     []
   );
 
   useFrame((state) => {
-    if (!materialRef.current) return;
-
-    const time = state.clock.getElapsedTime();
-
-    // Normalize mouse position to 0-1 range
-    const mouseX = (mousePosition.x / size.width) || 0.5;
-    const mouseY = 1.0 - (mousePosition.y / size.height) || 0.5;
-
-    materialRef.current.uniforms.uTime.value = time;
-    materialRef.current.uniforms.uMouse.value.set(mouseX, mouseY);
-    materialRef.current.uniforms.uPixelRatio.value = Math.min(
-      state.viewport.dpr,
-      2
-    );
+    if (materialRef.current) {
+      materialRef.current.uniforms.uTime.value = state.clock.elapsedTime * 0.3;
+      materialRef.current.uniforms.uMouse.value.lerp(
+        new THREE.Vector2(uMouse[0], uMouse[1]),
+        0.1
+      );
+    }
   });
 
-  const uniforms = useMemo(
-    () => ({
-      uTime: { value: 0 },
-      uMouse: { value: new THREE.Vector2(0.5, 0.5) },
-      uPixelRatio: { value: 1 },
-      uColorBg: { value: colors.bg },
-      uColorSurface: { value: colors.surface },
-      uColorAccent: { value: colors.accent },
-      uColorGlow: { value: colors.glow },
-    }),
-    [colors]
+  return (
+    <shaderMaterial
+      ref={materialRef}
+      vertexShader={vertexShaderSource}
+      fragmentShader={fragmentShaderSource}
+      uniforms={uniforms}
+      transparent={false}
+      side={THREE.DoubleSide}
+    />
+  );
+}
+
+export default function HeroShader({ mousePosition, isHovering = false }: HeroShaderProps) {
+  const { size } = useThree();
+  
+  // Convert mouse position to normalized device coordinates
+  const normalizedMouse = useMemo(() => {
+    return [
+      mousePosition.x / (typeof window !== 'undefined' ? window.innerWidth : 1),
+      1.0 - mousePosition.y / (typeof window !== 'undefined' ? window.innerHeight : 1),
+    ] as [number, number];
+  }, [mousePosition]);
+
+  const resolution = useMemo(
+    () => [size.width, size.height] as [number, number],
+    [size.width, size.height]
   );
 
   return (
-    <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-      <planeGeometry args={[viewport.width * 3, viewport.height * 3, 128, 128]} />
-      <shaderMaterial
-        ref={materialRef}
-        vertexShader={vertexShaderSource}
-        fragmentShader={fragmentShaderSource}
-        uniforms={uniforms}
-        transparent={false}
-        depthWrite={false}
-      />
-    </mesh>
+    <group>
+      {/* Main Voronoi Displacement Plane */}
+      <mesh position={[0, 0, 0]} rotation={[0, 0, 0]}>
+        <planeGeometry args={[2, 2, 128, 128]} />
+        <VoronoiMaterial
+          uTime={0}
+          uMouse={normalizedMouse}
+          uResolution={resolution}
+        />
+      </mesh>
+    </group>
   );
 }
