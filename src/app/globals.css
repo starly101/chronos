@@ -1,0 +1,213 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════
+   VOLCANIC DARK PALETTE — STARLY.DEV DESIGN SYSTEM
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Background Colors */
+  --bg-primary: #0C0C0A;
+  --bg-surface: #141412;
+  
+  /* Accent Colors */
+  --accent-primary: #C8A96E;      /* Antique Gold */
+  --accent-secondary: #E8E0D0;    /* Warm Cream */
+  --accent-glow: #D4B896;         /* Shader Highlight */
+  
+  /* Text Colors */
+  --text-primary: #E8E0D0;
+  --text-secondary: #4A4540;
+  --text-muted: #6B655F;
+  
+  /* Typography Scale */
+  --font-h1: clamp(3rem, 8vw, 9rem);
+  --font-h2: clamp(2rem, 5vw, 5rem);
+  --font-h3: clamp(1.25rem, 3vw, 2rem);
+  --font-body: clamp(1rem, 1.5vw, 1.125rem);
+  --font-small: 0.875rem;
+  
+  /* Letter Spacing */
+  --tracking-display: -0.04em;
+  --tracking-body: 0.01em;
+  
+  /* Line Height */
+  --leading-body: 1.75;
+  
+  /* Cursor */
+  --cursor-size: 12px;
+  --cursor-outer-size: 40px;
+  
+  /* Transitions */
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-out-cubic: cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GLOBAL RESET & BASE STYLES
+   ═══════════════════════════════════════════════════════════════ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Instrument Sans', system-ui, sans-serif;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+  overflow-x: hidden;
+  cursor: none; /* Hide default cursor */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TYPOGRAPHY
+   ═══════════════════════════════════════════════════════════════ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Syne', serif;
+  font-weight: 700;
+  letter-spacing: var(--tracking-display);
+  line-height: 1.1;
+}
+
+h1 {
+  font-size: var(--font-h1);
+}
+
+h2 {
+  font-size: var(--font-h2);
+}
+
+h3 {
+  font-size: var(--font-h3);
+}
+
+p {
+  font-size: var(--font-body);
+  line-height: var(--leading-body);
+}
+
+code, pre {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: var(--font-small);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CUSTOM CURSOR STYLES
+   ═══════════════════════════════════════════════════════════════ */
+
+.custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: difference;
+}
+
+.custom-cursor__inner {
+  width: var(--cursor-size);
+  height: var(--cursor-size);
+  background-color: var(--accent-primary);
+  border-radius: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s ease, height 0.2s ease;
+}
+
+.custom-cursor__outer {
+  width: var(--cursor-outer-size);
+  height: var(--cursor-outer-size);
+  border: 1px solid rgba(200, 169, 110, 0.3);
+  border-radius: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.custom-cursor--hover .custom-cursor__inner {
+  width: 40px;
+  height: 40px;
+}
+
+.custom-cursor--text .custom-cursor__inner {
+  width: 2px;
+  height: 24px;
+  border-radius: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SELECTION COLOR
+   ═══════════════════════════════════════════════════════════════ */
+
+::selection {
+  background-color: var(--accent-primary);
+  color: var(--bg-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCROLLBAR (WebKit)
+   ═══════════════════════════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--bg-surface);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--accent-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════════ */
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glow {
+  text-shadow: 0 0 40px rgba(200, 169, 110, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   REDUCED MOTION SUPPORT
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  body {
+    cursor: auto;
+  }
+  
+  .custom-cursor {
+    display: none;
+  }
+}
