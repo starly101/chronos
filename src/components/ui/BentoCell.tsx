@@ -1,135 +1,189 @@
-/**
- * ═══════════════════════════════════════════════════════════════
- * BENTO CELL COMPONENT
- * Reusable bento grid cell with hover effects
- * ═══════════════════════════════════════════════════════════════
- */
-
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { useElementMousePosition } from '@/hooks/useMousePosition';
+import gsap from 'gsap';
 
 interface BentoCellProps {
-  children: React.ReactNode;
   title: string;
+  label: string;
+  icon: string;
   description: string;
-  size?: 'small' | 'medium' | 'large';
-  className?: string;
-  icon?: string;
+  demoType: 'webgl' | 'motion' | 'ai' | 'code' | 'performance' | 'availability';
+  score?: number;
+  ctaText?: string;
+  onCtaClick?: () => void;
 }
 
-export const BentoCell = ({
-  children,
+export default function BentoCell({
   title,
-  description,
-  size = 'small',
-  className = '',
+  label,
   icon,
-}: BentoCellProps) => {
-  const cellRef = useRef<HTMLDivElement>(null);
-  const { x, y, isInside } = useElementMousePosition(cellRef);
+  description,
+  demoType,
+  score,
+  ctaText,
+  onCtaClick,
+}: BentoCellProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const cellRef = useRef<HTMLDivElement>(null);
+  const [counter, setCounter] = useState(0);
 
-  const sizeClasses = {
-    small: 'col-span-1 row-span-1',
-    medium: 'col-span-2 row-span-1',
-    large: 'col-span-1 row-span-2',
-  };
+  // Performance counter animation
+  useEffect(() => {
+    if (demoType === 'performance' && score) {
+      const ctx = gsap.context(() => {
+        gsap.to({ val: 0 }, {
+          val: score,
+          duration: 1.5,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: cellRef.current,
+            start: 'top 80%',
+          },
+          onUpdate: function() {
+            setCounter(Math.round(this.targets()[0].val));
+          },
+        });
+      }, cellRef);
+
+      return () => ctx.revert();
+    }
+  }, [demoType, score]);
 
   return (
     <motion.div
       ref={cellRef}
-      className={`relative overflow-hidden rounded-2xl bg-[#141412] border border-white/5 ${sizeClasses[size]} ${className}`}
+      className="relative h-full min-h-[280px] overflow-hidden rounded-xl bg-dark-800 border border-dark-600 p-6 cursor-pointer group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-100px' }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ scale: 1.02, borderColor: '#C8A96E' }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
     >
-      {/* Hover glow effect following cursor */}
-      {isInside && (
-        <div
-          className="absolute pointer-events-none transition-opacity duration-300"
-          style={{
-            left: x,
-            top: y,
-            width: 300,
-            height: 300,
-            background: 'radial-gradient(circle, rgba(200, 169, 110, 0.15) 0%, transparent 70%)',
-            transform: 'translate(-50%, -50%)',
-            opacity: isHovered ? 1 : 0,
-          }}
-        />
-      )}
+      {/* Live Demo Area */}
+      <div className="absolute inset-0 pt-24 pb-6 px-6">
+        {demoType === 'webgl' && (
+          <div className="w-full h-full flex items-center justify-center">
+            <motion.div
+              animate={{
+                rotate: [0, 360],
+                scale: [1, 1.2, 1],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: 'linear',
+              }}
+              className="w-20 h-20 rounded-full bg-gradient-to-r from-accent-gold to-accent-gold-light opacity-60"
+            />
+          </div>
+        )}
 
-      {/* Border highlight on hover */}
-      <div
-        className="absolute inset-0 rounded-2xl transition-opacity duration-300"
-        style={{
-          background: `radial-gradient(600px circle at ${x}px ${y}px, rgba(200, 169, 110, 0.3), transparent 40%)`,
-          opacity: isHovered ? 1 : 0,
-        }}
-      />
+        {demoType === 'motion' && (
+          <div className="w-full h-full flex items-center justify-center gap-2">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <motion.div
+                key={i}
+                className="w-3 h-8 bg-accent-gold rounded-full"
+                animate={{
+                  scaleY: [1, 2, 1],
+                }}
+                transition={{
+                  duration: 1.2,
+                  repeat: Infinity,
+                  delay: i * 0.15,
+                  ease: 'easeInOut',
+                }}
+              />
+            ))}
+          </div>
+        )}
 
-      {/* Content */}
-      <div className="relative z-10 h-full flex flex-col p-6">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-4">
-          {icon && (
-            <span className="text-2xl">{icon}</span>
-          )}
-          <motion.div
-            className="w-8 h-8 rounded-full border border-[#C8A96E]/30 flex items-center justify-center"
-            animate={{
-              scale: isHovered ? 1.1 : 1,
-              borderColor: isHovered ? '#C8A96E' : 'rgba(200, 169, 110, 0.3)',
-            }}
-            transition={{ duration: 0.3 }}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className={`transition-transform duration-300 ${isHovered ? 'translate-x-0.5 -translate-y-0.5' : ''}`}
-            >
-              <path d="M7 17L17 7M17 7H7M17 7V17" />
-            </svg>
-          </motion.div>
-        </div>
+        {demoType === 'ai' && (
+          <div className="w-full h-full flex flex-col justify-center">
+            <div className="font-mono text-xs text-light-300 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-accent-gold">{'>'}</span>
+                <span>Analyzing request...</span>
+              </div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0, 1, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className="w-2 h-4 bg-accent-gold"
+              />
+            </div>
+          </div>
+        )}
 
-        {/* Live Demo Area */}
-        <div className="flex-1 min-h-[120px] mb-4">
-          {children}
-        </div>
+        {demoType === 'code' && (
+          <div className="w-full h-full font-mono text-xs text-light-300 overflow-hidden">
+            <div className="space-y-1">
+              <div className="text-accent-gold">const</div>
+              <div>Component = () ={'>'} {'{'}</div>
+              <div className="pl-4">return (</div>
+              <div className="pl-8 text-light-200">&lt;Awesome /&gt;</div>
+              <div className="pl-4">)</div>
+              <div>{'}'}</div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0, 1, 0] }}
+                transition={{ duration: 0.8, repeat: Infinity }}
+                className="w-2 h-4 bg-accent-gold mt-2"
+              />
+            </div>
+          </div>
+        )}
 
-        {/* Footer */}
-        <div>
-          <h3 className="text-lg font-syne font-semibold text-[#E8E0D0] mb-1">
-            {title}
-          </h3>
-          <p className="text-sm text-[#4A4540]">
-            {description}
-          </p>
-        </div>
+        {demoType === 'performance' && (
+          <div className="w-full h-full flex flex-col items-center justify-center">
+            <div className="text-6xl font-bold text-accent-gold mb-2">
+              {counter}
+            </div>
+            <div className="text-label text-light-300">LIGHTHOUSE SCORE</div>
+          </div>
+        )}
+
+        {demoType === 'availability' && (
+          <div className="w-full h-full flex flex-col items-center justify-center">
+            <div className="relative mb-4">
+              <div className="w-4 h-4 bg-green-500 rounded-full animate-pulse" />
+              <div className="absolute inset-0 w-4 h-4 bg-green-500 rounded-full animate-ping opacity-75" />
+            </div>
+            <div className="text-body-md text-light-200 text-center">
+              Currently accepting<br />new projects
+            </div>
+            {ctaText && onCtaClick && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCtaClick();
+                }}
+                className="mt-4 px-4 py-2 text-sm font-mono text-accent-gold border border-accent-gold rounded hover:bg-accent-gold hover:text-dark-900 transition-all"
+              >
+                {ctaText}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Scale animation on hover */}
-      <motion.div
-        className="absolute inset-0 rounded-2xl border border-[#C8A96E]/0"
-        animate={{
-          scale: isHovered ? 1.02 : 1,
-          borderColor: isHovered ? 'rgba(200, 169, 110, 0.5)' : 'transparent',
-        }}
-        transition={{ duration: 0.3 }}
-      />
+      {/* Header Overlay */}
+      <div className="relative z-10">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-xl">{icon}</span>
+          <span className="text-label text-accent-gold">{label}</span>
+        </div>
+        <h3 className="text-heading-3 font-bold text-light-100 mb-2">
+          {title}
+        </h3>
+        <p className="text-body-sm text-light-300">
+          {description}
+        </p>
+      </div>
+
+      {/* Hover Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-transparent to-transparent opacity-0 group-hover:opacity-80 transition-opacity duration-500 pointer-events-none" />
     </motion.div>
   );
-};
-
-export default BentoCell;
+}
